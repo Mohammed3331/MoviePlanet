@@ -96,7 +96,7 @@ public class MainActivityFragment extends Fragment implements android.support.v4
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
                 if (cursor != null) {
-                    ((Callback) getActivity()).onItemSelected(COL_ID);
+                    ((Callback) getActivity()).onItemSelected(cursor.getInt(COL_ID));
                 }
                 mPosition = position;
                 /*Movie movies = (Movie) movieAdapter.getItem(position);
