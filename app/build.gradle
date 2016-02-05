@@ -21,7 +21,7 @@ android {
         }
     }
     buildTypes.each {
-        it.buildConfigField 'String', 'MOVIE_DB_API_KEY', '""'
+        it.buildConfigField 'String', 'MOVIE_DB_API_KEY', '"4ba99f43c07d44f2bbabe2be587a3344"'
     }
 }
 
@@ -30,4 +30,6 @@ dependencies {
     compile 'com.android.support:appcompat-v7:22.2.1'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.android.support:support-v4:22.2.1'
+    // Gradle dependency on Stetho
+    compile 'com.facebook.stetho:stetho:1.2.0'
 }

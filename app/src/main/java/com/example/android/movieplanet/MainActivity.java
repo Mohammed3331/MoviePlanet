@@ -3,6 +3,7 @@ package com.example.android.movieplanet;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -13,7 +14,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
     }
+    private final String LOG_TAG=MainActivity.class.getSimpleName();
 
 
     @Override
@@ -23,7 +26,37 @@ public class MainActivity extends AppCompatActivity {
 
         return true;
     }
+    @Override
+    protected void onStart(){
+        Log.v(LOG_TAG, "in onStart");
+        super.onStart();
+        //the activity is about to become visible
+    }
+    @Override
+    protected void onResume(){
+        Log.v(LOG_TAG,"in onResume");
+        super.onResume();
+        // the activity has become visible ("it is now resumed")
+    }
 
+    @Override
+    protected void onPause(){
+        Log.v(LOG_TAG,"in onPause");
+        super.onPause();
+        // Another activity is taking focus ("this activity is about to be paused")
+    }
+    @Override
+    protected void onStop(){
+        Log.v(LOG_TAG,"in onStop");
+        super.onStop();
+        //the activity is no longer visible(it's now stopped )
+    }
+    @Override
+    protected void onDestroy(){
+        Log.v(LOG_TAG,"in onDestroy");
+        super.onDestroy();
+        //the activity is about to be destroyed.
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will

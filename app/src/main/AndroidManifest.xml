@@ -35,6 +35,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.android.movieplanet.MainActivity" />
         </activity>
+        <provider
+            android:authorities="com.example.android.movieplanet"
+            android:name=".data.MovieProvider"/>
     </application>
 
 </manifest>
