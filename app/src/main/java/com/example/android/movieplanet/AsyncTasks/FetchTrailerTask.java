@@ -95,8 +95,6 @@ protected Void doInBackground(Integer... params) {
                 .appendQueryParameter("api_key", BuildConfig.MOVIE_DB_API_KEY).build();
 
         URL url = new URL(builder.toString());
-        // Log.v(LOG_TAG, "Built URI " + builder.toString());
-
 
         // Create the request to themoviedb, and open the connection
         urlConnection = (HttpURLConnection) url.openConnection();

@@ -78,8 +78,6 @@ public class FetchMovieTask extends AsyncTask<String, Void, Void> {
 
         }
 
-        //int inserted = 0;
-        //add to database
         if (cVVector.size() > 0) {
             ContentValues[] cvArray = new ContentValues[cVVector.size()];
             cVVector.toArray(cvArray);
