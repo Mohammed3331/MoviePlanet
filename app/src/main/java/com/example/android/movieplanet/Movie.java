@@ -28,63 +28,9 @@ public class Movie implements Parcelable{
 
 
     public  Movie(){
-        /*this.id=id;
-        this.posterPath=posterPath;
-        this.overview=overview;
-        this.releaseDate=releaseDate;
-        this.title=title;
-        this.backdropPath=backdropPath;
-        this.voteAverage=voteAverage;*/
     }
 
-  /*  public void setId(JSONObject movieJsonObject) throws JSONException{
-        this.id=movieJsonObject.getInt(_ID);
-    }
-    public int getId(){
-        return id;
-    }
 
-    public void setPosterPath(JSONObject movieJsonObject) throws JSONException {
-        this.posterPath="http://image.tmdb.org/t/p/w185/"+movieJsonObject.getString(POSTER_PATH);
-    }
-    public String getPosterPath(){
-        return posterPath;
-    }
-
-    public void setOverview(JSONObject movieJsonObject) throws JSONException{
-        this.overview=movieJsonObject.getString(OVERVIEW);
-    }
-    public String getOverview(){
-        return overview;
-    }
-
-    public void setReleaseDate(JSONObject movieJsonObject) throws JSONException{
-        this.releaseDate=movieJsonObject.getString(RELEASE_DATE);
-    }
-    public String getReleaseDate(){
-        return releaseDate;
-    }
-
-    public void setTitle(JSONObject movieJsonObject)throws JSONException{
-        this.title=movieJsonObject.getString(TITLE);
-    }
-    public String getTitle(){
-        return title;
-    }
-
-    public void setBackdropPath(JSONObject movieJsonObject) throws JSONException{
-        this.backdropPath= movieJsonObject.getString(BACKDROP_PATH);
-    }
-    public String getBackdropPath(){
-        return backdropPath;
-    }
-
-    public void setVoteAverage(JSONObject movieJsonObject) throws JSONException{
-        this.voteAverage=movieJsonObject.getDouble(VOTE_AVERAGE);
-    }
-    public Double getVoteAverage(){
-        return voteAverage;
-    }*/
     public Movie(Parcel in) {
 
         this.posterPath=in.readString();

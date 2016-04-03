@@ -7,16 +7,32 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MainActivityFragment.Callback {
+    private final String LOG_TAG=MainActivity.class.getSimpleName();
+    private static final String MovieDetailFragment_TAG = "MDFTAG";
+    private boolean mTwoPane;
+    private String mSortPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mSortPrefs=Utility.getSortPreference(this);
+
+        if(findViewById(R.id.fragment)!=null){
+            mTwoPane =true;
+            if (savedInstanceState== null){
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment, new MovieDetailsFragment(),MovieDetailFragment_TAG)
+                        .commit();
+            }
+        }else{
+            mTwoPane=false;
+        }
 
 
     }
-    private final String LOG_TAG=MainActivity.class.getSimpleName();
+
 
 
     @Override
@@ -37,6 +53,21 @@ public class MainActivity extends AppCompatActivity {
         Log.v(LOG_TAG,"in onResume");
         super.onResume();
         // the activity has become visible ("it is now resumed")
+
+        String sortPrefs=Utility.getSortPreference(this);
+
+        if (sortPrefs != null && !sortPrefs.equals(mSortPrefs)){
+            MainActivityFragment maf = (MainActivityFragment)getSupportFragmentManager().findFragmentById(R.id.container);
+            if (null != maf){
+                if(sortPrefs.equals("favorites"))
+                    maf.updateFavoritesLoader();
+                else
+                maf.updateMovies();
+            }
+
+            mSortPrefs=sortPrefs;
+        }
+
     }
 
     @Override
@@ -75,4 +106,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public void onItemSelected(int movieId) {
+        if (mTwoPane){
+            Bundle arguments = new Bundle();
+            arguments.putInt("MovieDetails", movieId);
+          /*  Log.v("OnItmeSelected", "TwoPaneMode");
+            Log.v("OnItemSelected","MovieId="+movieId);*/
+
+            //pass movie id to detail fragment
+            MovieDetailsFragment MDF = new MovieDetailsFragment();
+            MDF.setArguments(arguments);
+
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment,MDF,MovieDetailFragment_TAG)
+                    .commit();
+
+        }else {
+            //start detail activity via intent
+            Intent intent = new Intent(this, MovieDetails.class).putExtra("movie_intent", movieId);
+            startActivity(intent);
+        }
+    }
 }

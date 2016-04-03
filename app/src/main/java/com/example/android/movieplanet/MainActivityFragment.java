@@ -3,10 +3,11 @@ package com.example.android.movieplanet;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -16,24 +17,24 @@ import android.widget.ListView;
 import com.example.android.movieplanet.AsyncTasks.FetchMovieTask;
 import com.example.android.movieplanet.data.MovieContract;
 
-import java.util.List;
-
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment implements android.support.v4.app.LoaderManager.LoaderCallbacks<Cursor> {
-    MovieAdapter movieAdapter;
-    private List<Movie> movieList;
-    GridView gridView;
+public class MainActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+    private MovieAdapter movieAdapter;
+    //private List<Movie> movieList;
+    private GridView gridView;
 
-    private int mPosition= ListView.INVALID_POSITION;
+
+    private final String LOG_TAG=MainActivityFragment.class.getSimpleName();
+    private int mPosition= GridView.INVALID_POSITION;
     private static final String SELECTED_KEY="selected_position";
 
     private static final int Movie_loader=0;
 
     private static final String[] MOVIE_COLUMNS = {
-            MovieContract.MovieEntry._ID,
+            MovieContract.MovieEntry.TABLE_NAME+"."+ MovieContract.MovieEntry._ID,
             MovieContract.MovieEntry.COLUMN_POSTER_PATH,
             MovieContract.MovieEntry.COLUMN_ID,
     };
@@ -48,9 +49,9 @@ public class MainActivityFragment extends Fragment implements android.support.v4
     public void onCreate(Bundle savedInstanceState) {
 
         //first time view created
-        if(savedInstanceState == null){
+        /*if(savedInstanceState == null){
             updateMovies();
-        }
+        }*/
 
         super.onCreate(savedInstanceState);
 
@@ -61,17 +62,23 @@ public class MainActivityFragment extends Fragment implements android.support.v4
         void onItemSelected(int movieId);
     }
 
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-
         getLoaderManager().initLoader(Movie_loader, null, this);
         super.onActivityCreated(savedInstanceState);
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-    }
 
+    @Override
+    public void onResume(){
+        Log.v(LOG_TAG, "in onResume");
+        super.onResume();
+        // the activity has become visible ("it is now resumed")
+
+        //String sortPrefs=Utility.getSortPreference(getActivity());
+        updateMovies();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -124,12 +131,14 @@ public class MainActivityFragment extends Fragment implements android.support.v4
         super.onSaveInstanceState(outState);
 
     }
-    private void updateMovies(){
+    public void updateMovies(){
         FetchMovieTask movieTask = new FetchMovieTask(getActivity());
         String sortBy = Utility.getSortPreference(getActivity());
         movieTask.execute(sortBy);
+      getLoaderManager().restartLoader(Movie_loader, null, this);
+           }
+    public void updateFavoritesLoader(){
         getLoaderManager().restartLoader(Movie_loader, null, this);
-
     }
    /* @Override
     public void onStart(){
@@ -138,39 +147,70 @@ public class MainActivityFragment extends Fragment implements android.support.v4
     }*/
 
     @Override
-    public android.support.v4.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+      Loader<Cursor> result;
         String sortPref= Utility.getSortPreference(getActivity());
-        switch (sortPref){
-            case "popularity":
-                return  new CursorLoader(getActivity(),
-                        MovieContract.MovieEntry.CONTENT_URI,
-                        MOVIE_COLUMNS,
-                        null,
-                        null,
-                        ""+ MovieContract.MovieEntry.COLUMN_POPULARITY +"DESC"
-                        );
-            case "vote_average":
-                return new CursorLoader(getActivity(),
-                        MovieContract.MovieEntry.CONTENT_URI,
-                        MOVIE_COLUMNS,
-                        null,
-                        null,
-                        ""+ MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE + "DESC");
-            default:
-                return null;
-        }
+      //  if (sortPref.equals("popularity")) {
 
+          /*  String sortOrder = MovieContract.MovieEntry.COLUMN_POPULARITY + " DESC LIMIT 20";
+            Uri MovieUri = MovieContract.MovieEntry.buildMoviesUri();
+            cursorLoader= new CursorLoader(getActivity(), MovieContract.MovieEntry.CONTENT_URI, MOVIE_COLUMNS, null, null, sortOrder);
+        return cursorLoader;
+*/
+       /* }else {
+            if (sortPref.equals("vote_average")){
+            String sortOrder = MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE + " DESC LIMIT 20";
+            Uri MovieUri = MovieContract.MovieEntry.buildMoviesUri();
+            cursorLoader= new CursorLoader(getActivity(), MovieContract.MovieEntry.CONTENT_URI, MOVIE_COLUMNS, null, null, sortOrder);
+        }}
+*/
+        switch (sortPref){
+            case "popularity.desc":
+                result=new CursorLoader(
+                        getActivity(),
+                        MovieContract.MovieEntry.CONTENT_URI,
+                        MOVIE_COLUMNS,
+                        null,
+                        null,
+                         MovieContract.MovieEntry.COLUMN_POPULARITY +" DESC LIMIT 20"
+                        );
+                break;
+
+            //return cursorLoader;
+
+            case "vote_average.desc":
+               result=  new CursorLoader(getActivity(),
+                        MovieContract.MovieEntry.CONTENT_URI,
+                        MOVIE_COLUMNS,
+                        null,
+                        null,
+                         MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE + " desc limit 20" );
+                         break;
+                //return cursorLoader;
+            case "favorites.desc":
+                result=new CursorLoader(getActivity(),
+                        MovieContract.MovieEntry.CONTENT_URI,
+                        MOVIE_COLUMNS,
+                        MovieContract.MovieEntry.COLUMN_FAVORED +" = ?",
+                        new String[]{"1"},
+                        MovieContract.MovieEntry.COLUMN_FAVORED + "desc");
+
+            default:
+                throw new UnsupportedOperationException("sort value " + sortPref + " is not supported");
+
+        }
+        return  result;
     }
 
     @Override
-    public void onLoadFinished(android.support.v4.content.Loader<Cursor> loader, Cursor data) {
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         movieAdapter.swapCursor(data);
-        if (mPosition!=ListView.INVALID_POSITION)
+        if (mPosition!=GridView.INVALID_POSITION)
             gridView.smoothScrollToPosition(mPosition);
     }
 
     @Override
-    public void onLoaderReset(android.support.v4.content.Loader<Cursor> loader) {
+    public void onLoaderReset(Loader<Cursor> loader) {
         movieAdapter.swapCursor(null);
     }
 

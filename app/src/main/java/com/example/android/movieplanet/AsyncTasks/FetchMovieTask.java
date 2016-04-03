@@ -6,9 +6,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.example.android.movieplanet.BuildConfig;
 import com.example.android.movieplanet.ImageAdapter;
-import com.example.android.movieplanet.Movie;
+import com.example.android.movieplanet.Utility;
 import com.example.android.movieplanet.data.MovieContract;
 
 import org.json.JSONArray;
@@ -21,8 +20,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Vector;
 
 /**
@@ -30,13 +27,13 @@ import java.util.Vector;
  */
 public class FetchMovieTask extends AsyncTask<String, Void, Void> {
     private ImageAdapter movieAdapter;
-    private List<Movie> movieList;
+
     private Context mContext;
     private final String LOG_TAG = FetchMovieTask.class.getSimpleName();
 
     public FetchMovieTask(Context context) {
         mContext = context;
-        this.movieAdapter = movieAdapter;
+
     }
 
     private void getMoviesInfoFromJson(String movieJsonStr) throws JSONException {
@@ -52,7 +49,6 @@ public class FetchMovieTask extends AsyncTask<String, Void, Void> {
         JSONArray moviesArray = JSONString.getJSONArray("results");
 
         Vector<ContentValues> cVVector = new Vector<ContentValues>(moviesArray.length());
-        List<Movie> movieList = new ArrayList<>();
 
         for (int i = 0; i < moviesArray.length(); i++) {
             JSONObject movie = moviesArray.getJSONObject(i);
@@ -74,20 +70,12 @@ public class FetchMovieTask extends AsyncTask<String, Void, Void> {
             movieValues.put(MovieContract.MovieEntry.COLUMN_BACKDROP_PATH, backdropPath);
             movieValues.put(MovieContract.MovieEntry.COLUMN_POPULARITY,popularity);
             movieValues.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, voteAverage);
+
+            // update trailer and review
+            updateTrailer(id);
+            updateReview(id);
             cVVector.add(movieValues);
 
-         /*   Movie movie1=new Movie();
-
-            movie1.posterPath=movie.getString("poster_path");
-            movie1.overview=movie.getString("overview");
-            movie1.releaseDate = movie.getString("release_date");
-            movie1.id=movie.getInt("id");
-            movie1.title = movie.getString("title");
-            movie1.voteAverage = movie.getDouble("vote_average");
-
-
-            movieList.add(movie1);
-            Log.v(LOG_TAG, "movieList" + movieList);*/
         }
 
         //int inserted = 0;
@@ -99,28 +87,9 @@ public class FetchMovieTask extends AsyncTask<String, Void, Void> {
         }
         Log.d(LOG_TAG, "FetchPopularMovie Task Complete. " +  cVVector.size() + " Inserted");
 
-       /* Cursor cur = mContext.getContentResolver().query(MovieContract.MovieEntry.CONTENT_URI,null,null,null,null);
-        cVVector = new Vector<ContentValues>(cur.getCount());
-        if (cur.moveToFirst()){
-            do{
-                ContentValues cv = new ContentValues();
-                DatabaseUtils.cursorRowToContentValues(cur, cv);
-                cVVector.add(cv);
-            }while (cur.moveToNext());
-        }*/
-
-        //  return movieList;
-
-
-      //  return null;
     }
 
-        /*private String[] getYouTubeFromJSON(String movieJsonStr)throws JSONException{
-            JSONObject JSONString = new JSONObject(movieJsonStr);
-            JSONArray moviesArray = JSONString.getJSONArray("results");
 
-
-        }*/
 
 
     @Override
@@ -134,25 +103,23 @@ public class FetchMovieTask extends AsyncTask<String, Void, Void> {
         // Will contain the raw JSON response as a string.
         String movieJsonStr = null;
 
+        String sort = Utility.getSortPreference(mContext);
+        String order = "desc";
+        int minVotes = 50;
 
         try {
+            Uri.Builder builder = new Uri.Builder();
+            builder.scheme("http")
+                    .authority("api.themoviedb.org")
+                    .appendPath("3")
+                    .appendPath("discover")
+                    .appendPath("movie")
+                    .appendQueryParameter("sort_by",sort)
 
-            String baseUrl = "http://api.themoviedb.org/3/discover/movie?";
-            if (params[0].equals("vote_average.desc")) {
-                baseUrl = "http://api.themoviedb.org/3/discover/movie?certification_country=US&certification=R&";
+                    .appendQueryParameter("api_key", "4ba99f43c07d44f2bbabe2be587a3344");
 
-            }
-            if (params[0].equals("popularity.desc")) {
-                baseUrl = "http://api.themoviedb.org/3/discover/movie?";
-            }
-
-
-            final String sort = "sort_by";
-            String apiKey = "api_key";
-
-            Uri builtUri = Uri.parse(baseUrl).buildUpon().appendQueryParameter(sort, params[0]).appendQueryParameter(apiKey, BuildConfig.MOVIE_DB_API_KEY).build();
-            URL url = new URL(builtUri.toString());
-            // Log.v(LOG_TAG, "Built URI " + builtUri.toString());
+            URL url = new URL(builder.toString());
+            // Log.v(LOG_TAG, "Built URI " + builder.toString());
 
 
             // Create the request to themoviedb, and open the connection
@@ -202,35 +169,16 @@ public class FetchMovieTask extends AsyncTask<String, Void, Void> {
                     Log.e(LOG_TAG, "Error closing stream", e);
                 }
             }
-
-
         }
-       /* try {
-           movieList= getMoviesInfoFromJson(movieJsonStr);
-            return movieList;
-        } catch (JSONException e) {
-            Log.e(LOG_TAG, e.getMessage(), e);
-            e.printStackTrace();
-        }
-        // This will only happen if there was an error getting or parsing the forecast.
-        return null;
-    }*/
-
-
-    /*@Override
-    protected void onPostExecute(List<Movie> result) {
-        if (result != null) {
-            if (movieAdapter != null){
-                movieAdapter.clear();
-            for (Movie movie:result)
-                movieAdapter.add(movie);
-
-        }
-        }
-    }*/
-
         return null;
     }
+    private void updateTrailer(int movieId){
+        FetchTrailerTask fitchTrailerTask = new FetchTrailerTask(mContext);
+        fitchTrailerTask.execute(movieId);
+    }
+    private void updateReview(int movieId){
+        FetchReviewTask fitchReviewTask = new FetchReviewTask(mContext);
+        fitchReviewTask.execute(movieId);
 
-
+    }
 }

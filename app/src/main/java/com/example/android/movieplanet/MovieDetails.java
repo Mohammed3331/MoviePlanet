@@ -8,10 +8,24 @@ import android.view.MenuItem;
 
 public class MovieDetails extends AppCompatActivity {
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_details);
+        if (savedInstanceState == null){
+
+            Bundle arguments = new Bundle();
+            arguments.putInt("MovieDetails",getIntent().getIntExtra("movie_intent",-1));
+
+            MovieDetailsFragment MDF = new MovieDetailsFragment();
+            MDF.setArguments(arguments);
+
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment,MDF)
+                    .commit();
+        }
 
     }
 

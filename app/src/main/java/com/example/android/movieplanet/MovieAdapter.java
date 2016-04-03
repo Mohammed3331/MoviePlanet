@@ -2,6 +2,7 @@ package com.example.android.movieplanet;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +48,7 @@ public class MovieAdapter extends CursorAdapter {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
         String posterUrl = cursor.getString(MainActivityFragment.COL_POSTER_PATH);
-        Picasso.with(context).load(posterUrl).placeholder(R.drawable.placeholder).error(R.drawable.error).into(viewHolder.poster);
+        Log.v(LOG_TAG,"poster url"+posterUrl);
+        Picasso.with(context).load(posterUrl).resize(300,500).placeholder(R.drawable.placeholder).error(R.drawable.error).into(viewHolder.poster);
     }
 }
